@@ -1,0 +1,66 @@
+---
+title: 'DATA607: Project 1'
+author: "James Williams"
+output:
+  html_document:
+    df_print: paged
+  html_notebook: default
+  pdf_document: default
+---
+Import Libraries
+```{r}
+library(tidyverse)
+library(dplyr)
+library(tidyr)
+library(stringr)
+library(stringi)
+library(splitstackshape)
+library(reshape)
+```
+Import Data
+```{r}
+df <- read.delim("https://raw.githubusercontent.com/jambawilliams/DATA607Project1/master/tournamentinfo.txt", header = FALSE)
+head(df)
+```
+Clean Data
+```{r}
+df_2 <- df[-(1:4),]
+df_3 <- str_split(df_2, "\\|")
+df_4 <- gsub("-", "", df_3)
+df_5 <- gsub("\"","", df_4, fixed = TRUE)
+df_6 <- stri_remove_empty_na(df_5)
+head(df_6)
+```
+Player Names
+```{r}
+names <- unlist(str_extract_all(unlist(df_6), "([[:upper:]]+\\s){2,}"))
+head(names)
+```
+Player's State
+```{r}
+states <- unlist(str_extract_all(unlist(df_6), "(ON|MI|OH)\\s\\,"))
+states <- gsub(" ,", "", states)
+head(states)
+```
+
+Player's Total Number of Points
+```{r}
+points <- unlist(str_extract_all(unlist(df_6), "\\d\\.\\d"))
+head(points)
+```
+Player's Pre-Rating
+```{r}
+ratings <- unlist(str_extract_all(unlist(df_6), "(?<!\\>\\s)(?<=\\s{1,2}|\\s\\:)(\\d{3,4}(?=\\s|P))"))
+ratings <- as.integer(str_extract(ratings, "\\d+"))
+head(ratings)
+```
+
+Summary Table
+```{r}
+tournament <- data.frame(names, states, points, ratings)
+head(tournament)
+```
+Export Table to CSV
+```{r}
+write.csv(tournament, file = "tournament.csv")
+```
